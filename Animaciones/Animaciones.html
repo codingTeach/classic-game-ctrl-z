@@ -4,8 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <script src="https://aframe.io/releases/1.0.0/aframe.min.js"></script>
 </head>
 <body>
-    
+    <a-scene>
+    <a-sphere color="red" position="-5 0 -5"
+    animation="
+    property: color;
+    from: rgb(255, 0, 0);
+    to: rgb(0, 0, 255);
+    startEvents: click;
+    "></a-sphere>
+    <a-camera><a-cursor></a-cursor></a-camera>
+    </a-scene>
 </body>
 </html>
