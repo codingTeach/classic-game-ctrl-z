@@ -3,10 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego en A-Frame</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <title>Space Invader 3D</title>
 </head>
 <body>
-    <div>Hola mundo</div>
-    
+    <a-scene>
+        <a-camera position="0 10 8" rotation="-45 0 0" wasd-controls="enabled: false" look-controls="enabled: false"></a-camera>
+
+        <a-sky color="Black"></a-sky>
+        <a-plane rotation="-90 0 0" Width="35" height="35" color="green" position="0 0 -15"></a-plane>
+        <a-entity id="player" gltf-model="models/nave_inimiga.glb" position="0 0.5 -4" scale="0.2 0.2 0.2" rotation="0 180 0"></a-entity>
+        <a-entity id="normal" gltf-model="" position="0 1 -4" scale="0.2 0.2 0.2" rotation="0 180 0"></a-entity>
+    </a-scene>
 </body>
+<script src="game-logic.js"></script>
 </html>
