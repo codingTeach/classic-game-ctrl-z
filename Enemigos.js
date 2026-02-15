@@ -33,8 +33,6 @@ function spawnUFO() {
     moveUFO(ufo);
 }
 
-// lo ejecutamos una sola vez
-spawnUFO();
 
 function moveUFO(ufo) {
 
@@ -45,6 +43,7 @@ function moveUFO(ufo) {
         if (ufo.object3D.position.x > ufoLimit) {
             ufo.parentNode.removeChild(ufo);
             ufoActivo = false;
+            scheduleNextUFO();
             return;
         }
 
@@ -53,11 +52,14 @@ function moveUFO(ufo) {
 
     update();
 }
+//no aparece otro asta que este salga de ecena o sea destruido
+function scheduleNextUFO() {
+    setTimeout(() => {
+        spawnUFO();
+    }, 26500);
+}
+scheduleNextUFO();
 
-// aparición automática cada cierto tiempo
-setInterval(() => {
-    spawnUFO();
-}, 12000);
 
 //simple animacion para ufon
 function flashRedUFO() {
@@ -82,6 +84,7 @@ function flashRedUFO() {
     });
 }
 
+//simple animacion de la nave 
 function explosionUFO(position) {
 
     const scene = document.querySelector("a-scene");

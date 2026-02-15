@@ -231,7 +231,7 @@ function detectarColision(bala) {
                     ufoEntity.setAttribute("scale", "0.005 0.005 0.005");
             }, 100);
 
-            if(ufoVida <=0 ){
+            if(ufoVida <=0 && ufoEntity ){
                 const pos = ufoEntity.getAttribute("position");
 
                 explosionUFO(pos);
@@ -240,6 +240,8 @@ function detectarColision(bala) {
 
             ufoActivo = false;
             ufoEntity = null;
+
+            scheduleNextUFO();
 
             console.log("UFO destruido")
 
