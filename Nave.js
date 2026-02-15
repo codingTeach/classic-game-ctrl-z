@@ -1,7 +1,12 @@
 const player = document.querySelector('#player');
 const speed = 0.15;
 const limitX = 15;
+//const minZ = -5;
+//const maxZ = 0;
 const keys = {};
+
+let lastShot = 0;
+const fireRate = 200;
 
 // ===============================
 // CONTROLES
@@ -9,11 +14,7 @@ const keys = {};
 window.addEventListener('keydown', e => keys[e.key] = true);
 window.addEventListener('keyup', e => keys[e.key] = false);
 
-window.addEventListener('keydown', e => {
-    if (e.code === 'Space') {
-        shoot();
-    }
-});
+
 
 function movePlayer() {
     const pos = player.object3D.position;
@@ -25,6 +26,15 @@ function movePlayer() {
     if (keys['ArrowRight'] || keys['d']) {
         if (pos.x < limitX) pos.x += speed;
     }
+    if (keys[' ']){
+        tryShoot();
+    }
+    //if(keys['Arrowup'] || keys['w']){
+       // if(pos.z > minZ) pos.z -= speed;
+    //}
+    //if(keys['Arrowdown'] || keys['s']){
+       // if(pos.z < maxZ) pos.z += speed;
+   // }
 
     requestAnimationFrame(movePlayer);
 }
@@ -46,13 +56,38 @@ function shoot() {
         y: 0.5,
         z: playerPos.z - 0.5
     });
-
+    // capa interior
     bala.setAttribute('radius', 0.1);
-    bala.setAttribute('color', 'yellow');
+    bala.setAttribute('material', {
+        color: '#00ffff',
+        emissive: '#00ffff',
+        emissiveIntensity: 10
+    });
+
+
+    //capa exterior 
+    const glow = document.createElement('a-sphere');
+    glow.setAttribute('radius', 0.18);
+    glow.setAttribute('material', {
+        color: '#00ffff',
+        transparent: true,
+        opacity: 0.25
+    });
+    bala.appendChild(glow);
+    
 
     scene.appendChild(bala);
 
     movimientobala(bala);
+}
+
+function tryShoot(){
+    const now = Date.now();
+
+    if(now - lastShot >= fireRate){
+        shoot();
+        lastShot = now;
+    }
 }
 
 function movimientobala(bala) {
