@@ -204,4 +204,46 @@ function detectarColision(bala) {
                 bala.parentNode.removeChild(bala);
         }
     });
+
+    //colision con ufo
+    if (ufoActivo && ufoEntity){
+        const balaPos = bala.object3D.position;
+        const ufoWorldPos = new THREE.Vector3();
+
+        ufoEntity.object3D.getWorldPosition(ufoWorldPos);
+
+        const dx = Math.abs(ufoWorldPos.x - balaPos.x);
+        const dy = Math.abs(ufoWorldPos.y - balaPos.y);
+        const dz = Math.abs(ufoWorldPos.z - balaPos.z);
+
+        if (dx < 1 && dy < 1 && dz < 1){
+            if(bala.parentNode)
+                bala.parentNode.removeChild(bala);
+
+            ufoVida--;
+           flashRedUFO();
+
+            console.log("Vida UFo : ", ufoVida);
+
+            ufoEntity.setAttribute("scale", "0.0045 0.0045 0.0045");
+            setInterval(() => {
+                if (ufoEntity)
+                    ufoEntity.setAttribute("scale", "0.005 0.005 0.005");
+            }, 100);
+
+            if(ufoVida <=0 ){
+                const pos = ufoEntity.getAttribute("position");
+
+                explosionUFO(pos);
+                if (ufoEntity.parentNode)
+                    ufoEntity.parentNode.removeChild(ufoEntity);
+
+            ufoActivo = false;
+            ufoEntity = null;
+
+            console.log("UFO destruido")
+
+            }
+        }
+    }
 }
