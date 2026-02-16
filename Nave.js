@@ -6,7 +6,7 @@ const limitX = 15;
 const keys = {};
 
 let lastShot = 0;
-const fireRate = 200;
+const fireRate = 600;
 
 // ===============================
 // CONTROLES
@@ -92,16 +92,24 @@ function tryShoot(){
 
 function movimientobala(bala) {
     const speed = 0.4;
+    let activo = true; 
 
     function update() {
+        if (!activo) return; 
 
         bala.object3D.position.z -= speed;
 
-        detectarColision(bala);
+        const impacto = detectarColision(bala); 
+        
+        if (impacto) {
+            activo = false; 
+            return;
+        }
 
         if (bala.object3D.position.z < -30) {
             if (bala.parentNode)
                 bala.parentNode.removeChild(bala);
+            activo = false; 
             return;
         }
 
@@ -176,7 +184,7 @@ function detectarColision(bala) {
 
     const bloques = document.querySelectorAll(".bloque");
 
-    bloques.forEach(bloque => {
+    for (let bloque of bloques) {
 
         const bloqueWorldPos = new THREE.Vector3();
         bloque.object3D.getWorldPosition(bloqueWorldPos);
@@ -187,7 +195,6 @@ function detectarColision(bala) {
         const dy = Math.abs(bloqueWorldPos.y - balaPos.y);
         const dz = Math.abs(bloqueWorldPos.z - balaPos.z);
 
-        // Ajustado para tamaño 0.3
         if (dx < 0.2 && dy < 0.2 && dz < 0.2) {
 
             bloque.vida--;
@@ -202,8 +209,10 @@ function detectarColision(bala) {
 
             if (bala.parentNode)
                 bala.parentNode.removeChild(bala);
+            
+            return true; // 🔥 Indicar que hubo impacto
         }
-    });
+    }
 
     //colision con ufo
     if (ufoActivo && ufoEntity){
@@ -221,12 +230,12 @@ function detectarColision(bala) {
                 bala.parentNode.removeChild(bala);
 
             ufoVida--;
-           flashRedUFO();
+            flashRedUFO();
 
             console.log("Vida UFo : ", ufoVida);
 
             ufoEntity.setAttribute("scale", "0.0045 0.0045 0.0045");
-            setInterval(() => {
+            setTimeout(() => {
                 if (ufoEntity)
                     ufoEntity.setAttribute("scale", "0.005 0.005 0.005");
             }, 100);
@@ -235,17 +244,50 @@ function detectarColision(bala) {
                 const pos = ufoEntity.getAttribute("position");
 
                 explosionUFO(pos);
+                addScore(300);
                 if (ufoEntity.parentNode)
                     ufoEntity.parentNode.removeChild(ufoEntity);
 
-            ufoActivo = false;
-            ufoEntity = null;
+                ufoActivo = false;
+                ufoEntity = null;
 
-            scheduleNextUFO();
+                scheduleNextUFO();
 
-            console.log("UFO destruido")
-
+                console.log("UFO destruido")
             }
+            
+            return true; // 🔥 Indicar que hubo impacto
         }
     }
+
+    // COLISION CON ALIENS
+    const aliens = document.querySelectorAll(".alien");
+
+    for (let alien of aliens) {
+
+        const alienWorldPos = new THREE.Vector3();
+        alien.object3D.getWorldPosition(alienWorldPos);
+
+        const balaPos = bala.object3D.position;
+
+        const dx = Math.abs(alienWorldPos.x - balaPos.x);
+        const dy = Math.abs(alienWorldPos.y - balaPos.y);
+        const dz = Math.abs(alienWorldPos.z - balaPos.z);
+
+        if (dx < 0.8 && dy < 0.8 && dz < 0.8) {
+
+            if (bala.parentNode)
+                bala.parentNode.removeChild(bala);
+
+            explosionAlien(alien);
+            alien.remove();
+            addScore(alien.puntos || 10);
+
+            console.log("Alien destruido");
+
+            return true; // 🔥 Indicar que hubo impacto
+        }
+    }
+
+    return false; // 🔥 No hubo impacto
 }
