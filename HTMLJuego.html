@@ -3,10 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego en A-Frame</title>
+    <title>Space Invaders</title>
+    <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
 </head>
 <body>
-    <div>Hola mundo</div>
+    <a-scene>
+        
+        <!-- Assets Importados-->
+        <a-assets id="assets">
+            <a-asset-item id="alien1" src="models/Alien1Resize.glb"></a-asset-item>
+            <a-asset-item id="alien2" src="models/Alien2Resize.glb"></a-asset-item>
+            <a-asset-item id="alien3" src="models/Alien3Resize.glb"></a-asset-item>
+            <a-asset-item id="alien1low" src="models/Alien1Low.glb"></a-asset-item>
+        </a-assets>
+
+        <a-sky color="#967CEB"></a-sky>
+
+        <!-- Pruebas de modelos -->
+        <a-entity id="test-aliens" position="-20 0 0" rotation="0 90 0">
+            <a-entity gltf-model="#alien1" position="-2 1 -5" scale="0.5 0.5 0.5"></a-entity>
+            <a-entity gltf-model="#alien2" position="-6 0.5 -5" scale="0.5 0.5 0.5"></a-entity>
+            <a-entity gltf-model="#alien3" position="-10 1 -5" scale="0.5 0.5 0.5"></a-entity>
+            <a-entity gltf-model="#alien1low" position="-14 1 -5" scale="0.5 0.5 0.5"></a-entity>
+        </a-entity>
+
+        <a-entity id="formacion"></a-entity>
+
+    <script>
+
+        //Creacion de la formacion de aliens
+        window.addEventListener('DOMContentLoaded', () => {
+
+            const formacion = document.getElementById('formacion');
+            
+            const config = {
+                filas: 5,
+                columnas: 11,
+                espaciadoX: 5,
+                espaciadoY: 4,
+                coordY: 10,
+                coordX: -25,
+                coordZ: -20,
+                models: ['#alien1', '#alien2', '#alien2', '#alien3', '#alien3']
+            };
+            
+            
+            for (let f = 0; f < config.filas; f++) { //f = filas
+                for (let c = 0; c < config.columnas; c++) { //c = columnas
+                    const alien = document.createElement('a-entity');
+                    
+                    alien.setAttribute('gltf-model', config.models[f]);
+                    alien.setAttribute('position', {
+                        x: config.coordX + c * config.espaciadoX,
+                        y: config.coordY - f * config.espaciadoY,
+                        z: config.coordZ
+                    });
+                    
+                    alien.id = `alien-${f}-${c}`;
+                    formacion.appendChild(alien);
+                }
+            } 
+        });
+        </script>
+    </a-scene>
     
 </body>
 </html>
