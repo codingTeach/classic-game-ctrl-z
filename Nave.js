@@ -1,3 +1,6 @@
+let playerVidas = 3;
+let playerInvencible = false;
+let playerInvencibleTimer = null; 
 const player = document.querySelector('#player');
 const speed = 0.15;
 const limitX = 15;
@@ -8,6 +11,7 @@ const keys = {};
 let lastShot = 0;
 const fireRate = 600;
 
+let juegoActivo = true;
 // ===============================
 // CONTROLES
 // ===============================
@@ -17,6 +21,7 @@ window.addEventListener('keyup', e => keys[e.key] = false);
 
 
 function movePlayer() {
+    if (!juegoActivo) return;
     const pos = player.object3D.position;
 
     if (keys['ArrowLeft'] || keys['a']) {
@@ -95,7 +100,7 @@ function movimientobala(bala) {
     let activo = true; 
 
     function update() {
-        if (!activo) return; 
+        if (!juegoActivo || !activo) return;
 
         bala.object3D.position.z -= speed;
 
@@ -210,7 +215,7 @@ function detectarColision(bala) {
             if (bala.parentNode)
                 bala.parentNode.removeChild(bala);
             
-            return true; // 🔥 Indicar que hubo impacto
+            return true; 
         }
     }
 
@@ -256,7 +261,7 @@ function detectarColision(bala) {
                 console.log("UFO destruido")
             }
             
-            return true; // 🔥 Indicar que hubo impacto
+            return true; 
         }
     }
 
@@ -285,9 +290,102 @@ function detectarColision(bala) {
 
             console.log("Alien destruido");
 
-            return true; // 🔥 Indicar que hubo impacto
+            return true; 
         }
     }
 
-    return false; // 🔥 No hubo impacto
+    return false; 
 }
+
+// ===============================
+// GAME OVER
+// ===============================
+  
+
+function verificarColisionConPlayer() {
+    if (!juegoActivo) return;
+
+    const aliens = document.querySelectorAll(".alien");
+    const playerPos = player.object3D.position;
+
+    aliens.forEach(alien => {
+        const alienWorldPos = new THREE.Vector3();
+        alien.object3D.getWorldPosition(alienWorldPos);
+
+        const dx = Math.abs(alienWorldPos.x - playerPos.x);
+        const dy = Math.abs(alienWorldPos.y - playerPos.y);
+        const dz = Math.abs(alienWorldPos.z - playerPos.z);
+
+        // Si un alien toca al jugador
+        if (dx < 1 && dy < 1 && dz < 2) {
+            if (!playerInvencible) {
+                perderVida(); 
+            }
+        }
+    });
+
+    if (juegoActivo) {
+        requestAnimationFrame(verificarColisionConPlayer);
+    }
+}
+
+function gameOver() {
+    juegoActivo = false;
+    detenerDisparosAliens();
+
+    // Crear overlay de Game Over
+    const overlay = document.createElement('div');
+    overlay.id = 'gameOverScreen';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+    overlay.style.display = 'flex';
+    overlay.style.flexDirection = 'column';
+    overlay.style.justifyContent = 'center';
+    overlay.style.alignItems = 'center';
+    overlay.style.zIndex = '1000';
+
+    // Texto GAME OVER
+    const gameOverText = document.createElement('div');
+    gameOverText.textContent = 'GAME OVER';
+    gameOverText.style.fontSize = '120px';
+    gameOverText.style.fontWeight = 'bold';
+    gameOverText.style.color = 'red';
+    gameOverText.style.fontFamily = 'Arial, sans-serif';
+    gameOverText.style.textShadow = '0 0 20px red';
+    gameOverText.style.marginBottom = '30px';
+
+    // Texto de reinicio
+    const restartText = document.createElement('div');
+    restartText.textContent = 'Presiona R para reiniciar el juego';
+    restartText.style.fontSize = '36px';
+    restartText.style.color = 'white';
+    restartText.style.fontFamily = 'Arial, sans-serif';
+
+    overlay.appendChild(gameOverText);
+    overlay.appendChild(restartText);
+    document.body.appendChild(overlay);
+
+    console.log("GAME OVER");
+}
+
+function reiniciarJuego() {
+    location.reload();
+}
+
+// Detectar tecla R para reiniciar
+window.addEventListener('keydown', (e) => {
+    if (!juegoActivo && e.key.toLowerCase() === 'r') {
+        reiniciarJuego();
+    }
+});
+
+// Iniciar verificación de colisión con player
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        verificarColisionConPlayer();
+    }, 1000);
+});

@@ -2,8 +2,9 @@ let ufoActivo = false;
 let ufoEntity = null;
 let ufoVida = 0;
 let ufoVidaMaxima = 5;
-const ufoSpeed = 0.02;
+const ufoSpeed = 0.043;
 const ufoLimit = 18;
+
 
 //direccion
 let alienGroup = null;
@@ -45,6 +46,7 @@ function spawnUFO() {
 function moveUFO(ufo) {
 
     function update() {
+        if (!juegoActivo) return;
 
         ufo.object3D.position.x += ufoSpeed;
 
@@ -237,7 +239,7 @@ function explosionAlien(alien) {
 function moverAliens() {
 
     function update() {
-
+        if (!juegoActivo) return;
         if (!alienGroup) return;
 
         alienGroup.object3D.position.x += alienSpeed * alienDirection;
@@ -270,6 +272,312 @@ function moverAliens() {
     }
 
     update();
+}
+
+
+
+// ===============================
+// DISPARO DE ALIENS
+// ===============================
+let alienShootInterval = null;
+
+function iniciarDisparosAliens() {
+    // Disparan cada 1-2 segundos (aleatorio para más variedad)
+    alienShootInterval = setInterval(() => {
+        if (!juegoActivo) return;
+        
+        // Disparar entre 1 y 3 aliens al mismo tiempo
+        const cantidadDisparos = Math.floor(Math.random() * 3) + 1;
+        
+        for (let i = 0; i < cantidadDisparos; i++) {
+            dispararAlienAleatorio();
+        }
+    }, 1500); // Cada 1.5 segundos
+}
+
+function dispararAlienAleatorio() {
+    const aliens = document.querySelectorAll(".alien");
+    if (aliens.length === 0) return;
+
+    // Buscar aliens que pueden disparar (con carril despejado)
+    const alienesQuePuedenDisparar = [];
+
+    aliens.forEach(alien => {
+        if (tieneCarrilDespejado(alien)) {
+            alienesQuePuedenDisparar.push(alien);
+        }
+    });
+
+    if (alienesQuePuedenDisparar.length === 0) return;
+
+    // Seleccionar uno aleatorio
+    const alienSeleccionado = alienesQuePuedenDisparar[
+        Math.floor(Math.random() * alienesQuePuedenDisparar.length)
+    ];
+
+    crearDisparoAlien(alienSeleccionado);
+}
+
+function tieneCarrilDespejado(alien) {
+    const aliens = document.querySelectorAll(".alien");
+    
+    const posAlien = new THREE.Vector3();
+    alien.object3D.getWorldPosition(posAlien);
+
+    // Verificar si hay algún alien debajo en el mismo carril
+    for (let otroAlien of aliens) {
+        if (otroAlien === alien) continue;
+
+        const posOtro = new THREE.Vector3();
+        otroAlien.object3D.getWorldPosition(posOtro);
+
+        // Mismo carril X (con margen de 1 unidad)
+        const mismoCarril = Math.abs(posAlien.x - posOtro.x) < 1;
+        
+        // El otro está más adelante (mayor Z)
+        const estaDebajo = posOtro.z > posAlien.z;
+
+        if (mismoCarril && estaDebajo) {
+            return false; // Hay un alien bloqueando
+        }
+    }
+
+    return true; // Carril despejado
+}
+
+function crearDisparoAlien(alien) {
+    const scene = document.querySelector('a-scene');
+    const disparo = document.createElement('a-entity');
+
+    const alienPos = new THREE.Vector3();
+    alien.object3D.getWorldPosition(alienPos);
+
+    disparo.setAttribute('position', {
+        x: alienPos.x,
+        y: alienPos.y,
+        z: alienPos.z
+    });
+
+    // Crear el rayo (similar al original de Space Invaders)
+    const rayo = document.createElement('a-box');
+    rayo.setAttribute('width', 0.1);
+    rayo.setAttribute('height', 0.4);
+    rayo.setAttribute('depth', 0.1);
+    rayo.setAttribute('color', '#00ff00');
+    rayo.setAttribute('emissive', '#00ff00');
+    rayo.setAttribute('emissiveIntensity', 3);
+
+    disparo.appendChild(rayo);
+    scene.appendChild(disparo);
+
+    moverDisparoAlien(disparo);
+}
+
+function moverDisparoAlien(disparo) {
+    const speed = 0.2;
+    let activo = true;
+
+    function update() {
+        if (!juegoActivo || !activo) return;
+
+        disparo.object3D.position.z += speed; // Avanza hacia el jugador
+
+        // Verificar colisión con jugador
+        const disparoPos = disparo.object3D.position;
+        const playerPos = player.object3D.position;
+
+        const dx = Math.abs(disparoPos.x - playerPos.x);
+        const dy = Math.abs(disparoPos.y - playerPos.y);
+        const dz = Math.abs(disparoPos.z - playerPos.z);
+
+        if (dx < 0.5 && dy < 0.5 && dz < 0.5) {
+            // Impacto en el jugador
+            if (disparo.parentNode)
+                disparo.parentNode.removeChild(disparo);
+            activo = false;
+            perderVida();
+            return;
+        }
+
+        // Verificar colisión con bloques
+        const bloques = document.querySelectorAll(".bloque");
+        
+        for (let bloque of bloques) {
+            const bloqueWorldPos = new THREE.Vector3();
+            bloque.object3D.getWorldPosition(bloqueWorldPos);
+
+            const dx = Math.abs(bloqueWorldPos.x - disparoPos.x);
+            const dy = Math.abs(bloqueWorldPos.y - disparoPos.y);
+            const dz = Math.abs(bloqueWorldPos.z - disparoPos.z);
+
+            if (dx < 0.2 && dy < 0.2 && dz < 0.5) {
+                bloque.vida--;
+
+                if (bloque.vida === 1) {
+                    bloque.setAttribute("color", "orange");
+                }
+
+                if (bloque.vida <= 0) {
+                    bloque.parentNode.removeChild(bloque);
+                }
+
+                if (disparo.parentNode)
+                    disparo.parentNode.removeChild(disparo);
+                
+                activo = false;
+                return;
+            }
+        }
+
+        // Si sale del límite
+        if (disparo.object3D.position.z > 5) {
+            if (disparo.parentNode)
+                disparo.parentNode.removeChild(disparo);
+            activo = false;
+            return;
+        }
+
+        requestAnimationFrame(update);
+    }
+
+    update();
+}
+
+// Detener disparos cuando termine el juego
+function detenerDisparosAliens() {
+    if (alienShootInterval) {
+        clearInterval(alienShootInterval);
+        alienShootInterval = null;
+    }
+}
+
+// Iniciar los disparos cuando cargue el juego
+window.addEventListener("load", () => {
+    setTimeout(() => {
+        iniciarDisparosAliens();
+    }, 2000); // Espera 2 segundos antes de empezar a disparar
+});
+
+// ===============================
+// SISTEMA DE VIDAS
+// ===============================
+function explosionPlayer() {
+    const scene = document.querySelector("a-scene");
+    
+    const playerWorldPos = new THREE.Vector3();
+    player.object3D.getWorldPosition(playerWorldPos);
+
+    const container = document.createElement("a-entity");
+    container.setAttribute("position", playerWorldPos);
+
+    scene.appendChild(container);
+
+    const particleCount = 60;
+
+    for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement("a-sphere");
+
+        particle.setAttribute("radius", 0.08);
+        particle.setAttribute("color", "#00ffff");
+        particle.setAttribute("emissive", "#00ffff");
+        particle.setAttribute("emissiveIntensity", 2);
+
+        container.appendChild(particle);
+
+        const dir = new THREE.Vector3(
+            (Math.random() - 0.5) * 6,
+            (Math.random() - 0.5) * 6,
+            (Math.random() - 0.5) * 6
+        );
+
+        animateParticlePlayer(particle, dir);
+    }
+
+    setTimeout(() => {
+        if (container.parentNode)
+            container.parentNode.removeChild(container);
+    }, 800);
+}
+
+function animateParticlePlayer(particle, direction) {
+    let life = 0;
+
+    function update() {
+        life += 0.02;
+
+        particle.object3D.position.addScaledVector(direction, 0.02);
+
+        const opacity = 1 - life;
+        particle.setAttribute("opacity", opacity);
+        particle.setAttribute("transparent", true);
+
+        if (life < 1) {
+            requestAnimationFrame(update);
+        }
+    }
+
+    update();
+}
+
+function perderVida() {
+    if (playerInvencible) return;
+
+    playerVidas--;
+    updateVidas(playerVidas);
+    console.log("Vidas restantes: ", playerVidas);
+
+    // Explosión
+    explosionPlayer();
+
+    if (playerVidas <= 0) {
+        // Game Over
+        setTimeout(() => {
+            gameOver();
+        }, 500);
+    } else {
+        // Respawn con invencibilidad
+        respawnPlayer();
+    }
+}
+
+function respawnPlayer() {
+    // Ocultar temporalmente al jugador
+    player.setAttribute('visible', false);
+
+    setTimeout(() => {
+        // Resetear posición
+        player.object3D.position.set(0, 0.5, 1);
+        
+        // Hacer visible
+        player.setAttribute('visible', true);
+        
+        // Activar invencibilidad
+        activarInvencibilidad();
+    }, 1000);
+}
+
+function activarInvencibilidad() {
+    playerInvencible = true;
+    console.log("Invencibilidad activada");
+
+    // Efecto visual de parpadeo
+    let parpadeoInterval = setInterval(() => {
+        if (!juegoActivo) {
+            clearInterval(parpadeoInterval);
+            return;
+        }
+        
+        const visible = player.getAttribute('visible');
+        player.setAttribute('visible', !visible);
+    }, 200);
+
+    // Desactivar después de 3 segundos
+    playerInvencibleTimer = setTimeout(() => {
+        playerInvencible = false;
+        player.setAttribute('visible', true);
+        clearInterval(parpadeoInterval);
+        console.log("Invencibilidad desactivada");
+    }, 3000);
 }
 
 window.addEventListener("load", () => {
