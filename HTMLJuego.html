@@ -11,16 +11,18 @@
 <body>
 
 <a-scene>
-
-    <a-camera 
-        position="0 10 8" 
-        rotation="-45 0 0"
-
+    
+    <a-camera
+        id="mainCamera"
+        position="0 22 -15"
+        rotation="-75 0 0"
         wasd-controls="enabled: false"
-        look-controls="enabled: false">
+        look-controls="enabled: false"
+        follow-player>
     </a-camera>
 
     <a-sky color="black"></a-sky>
+    <a-entity id="snow"></a-entity>
 
 
 
@@ -34,10 +36,14 @@
 
     
 
+    
+
 </a-scene>
 
 <script src="Nave.js"></script>
 <script src="Enemigos.js"></script>
 <script src="score.js"></script>
+<script src="stars.js"></script>
+<script src="camara.js"></script>
 </body>
 </html>

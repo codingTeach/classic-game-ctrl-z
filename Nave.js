@@ -8,11 +8,11 @@ const limitX = 15;
 //const maxZ = 0;
 const keys = {};
 
-let lastShot = 0;
-const fireRate = 600;
+let lastShot = 0; 
+const fireRate = 500;
 
 let juegoActivo = true;
-// ===============================
+// ===============================score
 // CONTROLES
 // ===============================
 window.addEventListener('keydown', e => keys[e.key] = true);
@@ -146,7 +146,7 @@ function crearBase(xPos) {
     for (let y = 0; y < filas; y++) {
         for (let x = 0; x < columnas; x++) {
 
-            // Forma clásica tipo arcade
+            
             if (
                 (y === 0 && (x <= 1 || x >= 7)) ||
                 (y === 4 && x === 4)
@@ -159,7 +159,7 @@ function crearBase(xPos) {
             bloque.setAttribute("width", tamaño);
             bloque.setAttribute("height", tamaño);
             bloque.setAttribute("depth", 1);
-            bloque.setAttribute("color", "#EDE4CC");
+            bloque.setAttribute("color", "#ddcfa6");
 
             bloque.setAttribute("position", {
                 x: (x - columnas / 2) * tamaño,
