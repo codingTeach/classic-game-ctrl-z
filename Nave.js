@@ -9,7 +9,7 @@ const limitX = 15;
 const keys = {};
 
 let lastShot = 0; 
-const fireRate = 500;
+const fireRate = 300;
 
 let juegoActivo = true;
 // ===============================score
