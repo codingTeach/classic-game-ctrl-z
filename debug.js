@@ -54,15 +54,15 @@ function mostrarInfoDebug() {
     const bloques = document.querySelectorAll('.bloque').length;
     
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log('🎮 INFO DEBUG:');
+    console.log(' INFO DEBUG:');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log(`📊 Nivel actual: ${typeof nivelActual !== 'undefined' ? nivelActual : 'N/A'}`);
-    console.log(`💯 Score: ${typeof score !== 'undefined' ? score : 'N/A'}`);
-    console.log(`❤️  Vidas: ${typeof playerVidas !== 'undefined' ? playerVidas : 'N/A'}`);
-    console.log(`👾 Aliens restantes: ${aliens}`);
-    console.log(`🧱 Bloques de defensa: ${bloques}`);
-    console.log(`🎯 Juego activo: ${typeof juegoActivo !== 'undefined' ? juegoActivo : 'N/A'}`);
-    console.log(`📹 Estado cámara: ${typeof cameraState !== 'undefined' ? cameraState : 'N/A'}`);
+    console.log(` Nivel actual: ${typeof nivelActual !== 'undefined' ? nivelActual : 'N/A'}`);
+    console.log(` Score: ${typeof score !== 'undefined' ? score : 'N/A'}`);
+    console.log(` Vidas: ${typeof playerVidas !== 'undefined' ? playerVidas : 'N/A'}`);
+    console.log(` Aliens restantes: ${aliens}`);
+    console.log(` Bloques de defensa: ${bloques}`);
+    console.log(` Juego activo: ${typeof juegoActivo !== 'undefined' ? juegoActivo : 'N/A'}`);
+    console.log(` Estado cámara: ${typeof cameraState !== 'undefined' ? cameraState : 'N/A'}`);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 }
 
@@ -74,7 +74,7 @@ window.addEventListener('keydown', (e) => {
             if (typeof updateVidas === 'function') {
                 updateVidas(playerVidas);
             }
-            console.log('❤️  Vidas restauradas a 3');
+            console.log('Vidas restauradas a 3');
         }
     }
 });
@@ -82,14 +82,14 @@ window.addEventListener('keydown', (e) => {
 // Tecla N para saltar directamente al siguiente nivel
 window.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() === 'n') {
-        console.log('⏭️  Saltando al siguiente nivel...');
+        console.log('Saltando al siguiente nivel');
         matarTodosLosAliens();
     }
 });
 
 // Mostrar controles de debug al inicio
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-console.log('🛠️  CONTROLES DE DEBUG:');
+console.log('CONTROLES DE DEBUG:');
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 console.log('K - Matar todos los aliens');
 console.log('I - Mostrar información del juego');
