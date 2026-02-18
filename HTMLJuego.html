@@ -1,49 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Space Invaders 3D</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://unpkg.com/aframe-particle-system-component/dist/aframe-particle-system-component.min.js"></script>
-   
+    <script
+        src="https://unpkg.com/aframe-particle-system-component/dist/aframe-particle-system-component.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<!---ESTO ES PARA EL TITULO DEL JUEGO--->
+    <style>
+        #retroIntro {
+            position: fixed;
+            top: 30%;
+            width: 100%;
+            text-align: center;
+            color: white;
+            font-family: 'Press Start 2P', monospace;
+            z-index: 999;
+            pointer-events: none;
+        }
 
+        .title {
+            font-size: 42px;
+            margin-bottom: 40px;
+            text-shadow: 0 0 10px #fff,
+                0 0 20px #dddaa5,
+                0 0 40px #dddaa5;
+        }
+
+        .instructions {
+            font-size: 14px;
+            line-height: 2;
+            margin-bottom: 40px;
+            text-shadow: 0 0 6px #ffffff;
+        
+        }
+
+        .press {
+            font-size: 12px;
+            animation: blink 1s infinite;
+            text-shadow: 0 0 8px #00ffff;
+        }
+
+        .ufo {
+            font-size: 12px;
+            animation: blink 1s infinite;
+            text-shadow: 0 0 8px #ff2600;
+        }
+
+        .enemies {
+            font-size: 14px;
+            line-height: 2;
+            margin-bottom: 40px;
+            text-shadow: 0 0 6px #ffffff;
+        }
+
+        
+
+        @keyframes blink {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.2;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+    </style>
+
+<!---ESTO ES PARA EL TITULO DEL JUEGO--->
 </head>
+
 <body>
+    <!---ESTO ES PARA EL TITULO DEL JUEGO--->
+    <div id="retroIntro">
+        <div class="title">SPACE INVADERS 3D</div>
 
-<a-scene>
-    
-    <a-camera
-        id="mainCamera"
-        position="0 22 -15"
-        rotation="-75 0 0"
-        wasd-controls="enabled: false"
-        look-controls="enabled: false"
-        follow-player>
-    </a-camera>
+        <div class="instructions">
+            USA LAS FLECHAS PARA MOVERTE<br>
+            BARRA ESPACIADORA PARA DISPARAR
+        </div>
 
-    <a-sky color="black"></a-sky>
-    <a-entity id="snow"></a-entity>
+        <div class="press">
+            PRECIONA CUALQUIERTECLA
+            <br> </br>
+        </div>
+
+        <div class="ufo">
+            <br> </br>
+            UFO 300
+            <br> </br>
+        </div>
+
+        <div class="enemies">
+            INVADER-A 30 PTS
+            <br> </br>
+            INVADER-B 20 PTS
+             <br> </br>
+            INVADER-C 10 PTS
+        </div>
+    </div>
+    <!---ESTO ES PARA EL TITULO DEL JUEGO--->
+
+    <a-scene>
+
+        <a-camera id="mainCamera" position="0 22 -15" rotation="-75 0 0" wasd-controls="enabled: false"
+            look-controls="enabled: false" follow-player>
+        </a-camera>
+
+        <a-sky color="black"></a-sky>
+        <a-entity id="snow"></a-entity>
 
 
 
-    <a-entity 
-        id="player"
-        gltf-model="models/nave_inimiga.glb"
-        position="0 0.5 1"
-        scale="0.2 0.2 0.2"
-        rotation="0 180 0">
-    </a-entity>
+        <a-entity id="player" gltf-model="models/nave_inimiga.glb" position="0 0.5 1" scale="0.2 0.2 0.2"
+            rotation="0 180 0">
+        </a-entity>
 
-    
+    </a-scene>
 
-    
-
-</a-scene>
-
-<script src="Nave.js"></script>
-<script src="Enemigos.js"></script>
-<script src="score.js"></script>
-<script src="stars.js"></script>
-<script src="camara.js"></script>
+    <script src="Nave.js"></script>
+    <script src="Enemigos.js"></script>
+    <script src="score.js"></script>
+    <script src="stars.js"></script>
+    <script src="camara.js"></script>
 </body>
+
 </html>

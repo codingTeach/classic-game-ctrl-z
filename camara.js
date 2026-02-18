@@ -31,7 +31,7 @@ AFRAME.registerComponent('follow-player', {
 
 
 const LABEL_CONFIG = [
-    // { modelo, fila, puntos, color }  – fila 0 = la más al fondo (z más negativo)
+    
     { fila: 0, puntos: 30, color: "#ffffff", label: "INVADER-A" },
     { fila: 1, puntos: 20, color: "#ffffff", label: "INVADER-B" },
     { fila: 2, puntos: 20, color: "#ffffff", label: "INVADER-B" },
@@ -39,63 +39,26 @@ const LABEL_CONFIG = [
     { fila: 4, puntos: 10, color: "#ffffff", label: "INVADER-C" },
 ];
 
-// Parámetros que deben coincidir con crearFilaInvaders en Enemigos.js
-const FILA_SEPARACION = 2;
-const FILA_Z_BASE     = -24;
-const LABEL_Y         = 3;    // altura de los textos sobre el suelo
-const LABEL_CLASS     = "intro-label";
 
 function crearLabelsIntro() {
     const scene = document.querySelector("a-scene");
 
-    // ── Línea de UFO ──────────────────────────────────────────
-    const ufoLabel = document.createElement("a-text");
-    ufoLabel.setAttribute("value", "UFO  → 300 pts");
-    ufoLabel.setAttribute("color", "#ff4444");
-    ufoLabel.setAttribute("align", "center");
-    ufoLabel.setAttribute("width", 12);
-    ufoLabel.setAttribute("position", `0 ${LABEL_Y + 1} -34`);
-    ufoLabel.setAttribute("rotation", "0 0 0");
-    ufoLabel.classList.add(LABEL_CLASS);
-    scene.appendChild(ufoLabel);
 
-    // ── Una línea por tipo de fila ────────────────────────────
-    // Evitamos duplicados mostrando sólo filas únicas por puntos
     const vistas = new Set();
 
     LABEL_CONFIG.forEach(cfg => {
         const key = `${cfg.puntos}-${cfg.color}`;
         if (vistas.has(key)) return;
         vistas.add(key);
-
-        const z = FILA_Z_BASE + cfg.fila * FILA_SEPARACION;
-
-        const label = document.createElement("a-text");
-        label.setAttribute("value", `${cfg.label}  → ${cfg.puntos} pts`);
-        label.setAttribute("color", cfg.color);
-        label.setAttribute("align", "center");
-        label.setAttribute("width", 12);
-        label.setAttribute("position", `0 ${LABEL_Y} ${z}`);
-        label.setAttribute("rotation", "-60 0 0");
-        label.classList.add(LABEL_CLASS);
-        scene.appendChild(label);
+        
     });
 
-    // ── Línea "BASES protegen a tu nave" ─────────────────────
-    const baseLabel = document.createElement("a-text");
-    baseLabel.setAttribute("value", "BASES  →  te protegen");
-    baseLabel.setAttribute("color", "#ddcfa6");
-    baseLabel.setAttribute("align", "center");
-    baseLabel.setAttribute("width", 12);
-    baseLabel.setAttribute("position", `0 ${LABEL_Y} -3`);
-    baseLabel.setAttribute("rotation", "0 0 0");
-    baseLabel.classList.add(LABEL_CLASS);
-    scene.appendChild(baseLabel);
+
 }
 
 function eliminarLabelsIntro() {
     const labels = document.querySelectorAll(`.${LABEL_CLASS}`);
-    console.log(`🗑️ Eliminando ${labels.length} labels de intro`);
+    console.log(` Eliminando ${labels.length} labels de intro`);
     labels.forEach(el => {
         if (el.parentNode) {
             el.parentNode.removeChild(el);
@@ -105,103 +68,100 @@ function eliminarLabelsIntro() {
 
 // ── Transición intro → juego ─────────────────────────────────────
 function iniciarJuego() {
-    console.log("🎮 iniciarJuego() llamado - estado actual:", cameraState);
-    
-    if (cameraState === "juego") {
-        console.log("⚠️ Ya estamos en juego, saliendo");
-        return;
-    }
-    
-    cameraState = "juego";
-    console.log("✅ Estado cambiado a:", cameraState);
 
-    // 1. Ocultar overlay HTML
-    const overlay = document.getElementById("introOverlay");
-    if (overlay) {
-        overlay.classList.add("hidden");
-        overlay.style.display = "none";  // forzar ocultar
-        console.log("✅ Overlay HTML ocultado");
-    } else {
-        console.error("❌ No se encontró #introOverlay");
-    }
+    if (cameraState === "juego") return;
 
-    // 2. Quitar labels 3D
-    eliminarLabelsIntro();
+    const intro = document.getElementById("retroIntro");
+    if (intro) intro.style.display = "none";
 
-    // 3. Mover cámara instantáneamente a posición de juego
-    const cam    = document.querySelector("#mainCamera");
+    const cam = document.querySelector("#mainCamera");
     const player = document.querySelector("#player");
 
-    if (!cam) console.error("❌ No se encontró la cámara");
-    if (!player) console.error("❌ No se encontró el player");
+    const px = player.object3D.position.x;
+    const pz = player.object3D.position.z;
 
-    const px = player ? player.object3D.position.x : 0;
-    const pz = player ? player.object3D.position.z : 1;
+    // Posición final detrás de la nave
+    const finalPos = `${px} ${CAM_OFFSET_Y} ${pz + CAM_OFFSET_Z}`;
+    const finalRot = `${CAM_ROT_X} 0 0`;
 
-    cam.setAttribute("position", { x: px, y: CAM_OFFSET_Y, z: pz + CAM_OFFSET_Z });
-    cam.setAttribute("rotation", { x: CAM_ROT_X, y: 0, z: 0 });
+    // Animación de posición
+    cam.setAttribute("animation__move", {
+        property: "position",
+        to: finalPos,
+        dur: 1500,
+        easing: "easeInOutQuad"
+    });
 
-    console.log(`✅ Cámara reposicionada a (${px}, ${CAM_OFFSET_Y}, ${pz + CAM_OFFSET_Z})`);
+    // Animación de rotación
+    cam.setAttribute("animation__rotate", {
+        property: "rotation",
+        to: finalRot,
+        dur: 1500,
+        easing: "easeInOutQuad"
+    });
 
-    // 4. Inicializar el HUD (score y vidas)
-    
+    // Cuando termine la animación
+    cam.addEventListener("animationcomplete__move", () => {
+        cameraState = "juego";
+    }, { once: true });
 }
+
 
 // ── Escuchar "cualquier tecla" sólo en la intro ──────────────────
 function escucharTeclaInicio() {
-    console.log("👂 Escuchando teclas para iniciar juego...");
+    console.log("Escuchando teclas para iniciar juego...");
     
     const handler = (e) => {
         console.log("⌨️ Tecla presionada:", e.key);
         
         // Ignorar teclas de control del navegador
         if (["F5", "F11", "F12"].includes(e.key)) {
-            console.log("⚠️ Tecla de control ignorada");
+            console.log(" Tecla de control ignorada");
             return;
         }
 
-        console.log("✅ Tecla válida, iniciando juego...");
+        console.log(" Tecla válida, iniciando juego...");
         iniciarJuego();
         window.removeEventListener("keydown", handler);
-        console.log("✅ Listener de teclado removido");
+        console.log(" Listener de teclado removido");
     };
 
     window.addEventListener("keydown", handler);
-    console.log("✅ Listener de keydown agregado");
+    console.log(" Listener de keydown agregado");
 }
 
 
 
 // ── Inicialización principal ─────────────────────────────────────
 window.addEventListener("load", () => {
-    console.log("📦 camera.js cargado - configurando intro...");
+    console.log(" camera.js cargado - configurando intro...");
     
     const scene = document.querySelector("a-scene");
 
     if (!scene) {
-        console.error("❌ No se encontró a-scene");
+        console.error(" No se encontró a-scene");
         return;
     }
 
     const setupIntro = () => {
-        console.log("🎬 setupIntro() ejecutándose...");
+        console.log(" setupIntro() ejecutándose...");
         
         crearLabelsIntro();
 
         escucharTeclaInicio();
         escucharClickInicio();
 
-        console.log("🎮 Intro lista – esperando tecla o click");
-        console.log("📍 Estado actual de cameraState:", cameraState);
+        console.log(" Intro lista – esperando tecla o click");
+        console.log(" Estado actual de cameraState:", cameraState);
     };
 
     if (scene.hasLoaded) {
-        console.log("✅ Escena ya cargada, ejecutando setupIntro");
+        console.log(" Escena ya cargada, ejecutando setupIntro");
         setupIntro();
     } else {
-        console.log("⏳ Esperando que la escena cargue...");
+        console.log(" Esperando que la escena cargue...");
         scene.addEventListener("loaded", () => {
-            console.log("✅ Escena cargada, ejecutando setupIntro");
+            console.log(" Escena cargada, ejecutando setupIntro");
             setupIntro();
         });
     }

@@ -10,8 +10,8 @@ AFRAME.registerComponent('snow-z', {
       flake.setAttribute('opacity', 0.6);
 
       flake.setAttribute('position', {
-        x: (Math.random() - 0.5) * 20,
-        y: (Math.random() - 0.5) * 20,
+        x: (Math.random() - 0.5) * 80,
+        y: (Math.random() - 0.5) * 40,
         z: -Math.random() * 40   // empiezan lejos
       });
 
