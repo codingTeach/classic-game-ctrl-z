@@ -364,13 +364,7 @@ function reiniciarJuegoCompleto() {
 // Listener global para reiniciar con R
 window.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() === 'r' && !juegoActivo) {
-        // Remover overlays
-        document.querySelectorAll('[style*="position: fixed"]').forEach(overlay => {
-            if (overlay.id !== 'hud' && overlay.id !== 'retroIntro') {
-                overlay.remove();
-            }
-        });
-        
-        reiniciarJuegoCompleto();
+        // Recargar toda la página
+        location.reload();
     }
 });
