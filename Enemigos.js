@@ -21,7 +21,7 @@ const CONFIG = {
         respawnDelay: 1000,
     },
     rows: [
-        { model: "AlienG1.glb", puntos: 30 },
+        { model: "invader_4.glb", puntos: 30 },
         { model: "invader_3.glb", puntos: 20 },
         { model: "invader_3.glb", puntos: 20 },
         { model: "invader_2.glb", puntos: 10 },
@@ -158,7 +158,28 @@ function explosionUFO(position) {
 
 // ALIENS
 
+// Crear nuevo grupo de aliens
+function crearNuevoGrupoAliens() {
+    const scene = document.querySelector('a-scene');
+    if (alienGroup && alienGroup.parentElement) {
+        try {
+            alienGroup.remove();
+        } catch (e) {
+            console.warn('⚠️ Error al eliminar alienGroup anterior:', e);
+        }
+    }
+    alienGroup = document.createElement('a-entity');
+    scene.appendChild(alienGroup);
+    console.log('✅ Nuevo grupo de aliens creado');
+    return alienGroup;
+}
+
 function crearFilaInvaders(modelo, filaIndex, puntos) {
+    if (!alienGroup) {
+        console.error('❌ alienGroup no existe! Creando uno nuevo...');
+        crearNuevoGrupoAliens();
+    }
+    
     const { cantidad, separacion, posY, posZBase, separacionFilas } = CONFIG.invaderGrid;
     const startX = -((cantidad - 1) * separacion) / 2;
 
@@ -309,6 +330,11 @@ function moverDisparoAlien(disparo) {
 
 function explosionPlayer() {
     createExplosion(getWorldPos(player), { count: 60, color: "#00ffff", radius: 0.08, spread: 6, duration: 800 });
+    
+    // 🔊 Reproducir sonido de explosión del jugador
+    if (typeof sonidoExplosion === 'function') {
+        sonidoExplosion();
+    }
 }
 
 function perderVida() {
@@ -325,6 +351,11 @@ function respawnPlayer() {
         player.object3D.position.set(0, 0.5, 1);
         player.setAttribute("visible", true);
         activarInvencibilidad();
+        
+        // 🔊 Reproducir sonido de vida al respawnear
+        if (typeof sonidoVida === 'function') {
+            sonidoVida();
+        }
     }, CONFIG.player.respawnDelay);
 }
 
@@ -345,12 +376,11 @@ function activarInvencibilidad() {
 
 // INICIALIZACIÓN
 
-window.addEventListener("load", () => {
+function inicializarEnemigos() {
     const scene = document.querySelector("a-scene");
 
     function initGame() {
-        alienGroup = document.createElement("a-entity");
-        scene.appendChild(alienGroup);
+        crearNuevoGrupoAliens();
 
         scheduleNextUFO();
 
@@ -364,4 +394,6 @@ window.addEventListener("load", () => {
     scene.hasLoaded ? initGame() : scene.addEventListener("loaded", initGame);
 
     setTimeout(iniciarDisparosAliens, CONFIG.aliens.startDelay);
-});
+}
+
+window.addEventListener("load", inicializarEnemigos);

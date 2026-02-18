@@ -51,6 +51,11 @@ function shoot() {
     const scene     = document.querySelector('a-scene');
     const playerPos = player.object3D.position;
 
+    // 🔊 Reproducir sonido de disparo
+    if (typeof sonidoDisparo === 'function') {
+        sonidoDisparo();
+    }
+
     const bala = document.createElement('a-sphere');
     bala.setAttribute('radius', 0.1);
     bala.setAttribute('position', { x: playerPos.x, y: 0.5, z: playerPos.z - 0.5 });
@@ -155,6 +160,14 @@ function detectarColision(bala) {
             explosionAlien(alien);
             addScore(alien.puntos ?? 10);
             alien.remove();
+            
+            // Verificar si se completó el nivel
+            setTimeout(() => {
+                if (typeof verificarNivelCompletado === 'function') {
+                    verificarNivelCompletado();
+                }
+            }, 100);
+            
             return true;
         }
     }
@@ -198,9 +211,28 @@ function crearBase(xPos) {
     scene.appendChild(base);
 }
 
-crearBase(-6);
-crearBase(0);
-crearBase(6);
+function crearTodasLasBases() {
+    crearBase(-6);
+    crearBase(0);
+    crearBase(6);
+}
+
+function limpiarBases() {
+    const basesAEliminar = new Set();
+    document.querySelectorAll('.bloque').forEach(bloque => {
+        if (bloque.parentElement) {
+            basesAEliminar.add(bloque.parentElement);
+        }
+    });
+    basesAEliminar.forEach(base => {
+        if (base && base.parentElement) {
+            base.remove();
+        }
+    });
+}
+
+// Crear bases al inicio
+crearTodasLasBases();
 
 // COLISIÓN ALIEN → JUGADOR
 
@@ -228,6 +260,16 @@ function verificarColisionConPlayer() {
 function gameOver() {
     juegoActivo = false;
     detenerDisparosAliens();
+
+    // 🔊 Reproducir sonido de game over
+    if (typeof sonidoGameOver === 'function') {
+        sonidoGameOver();
+    }
+    
+    // Pausar música de fondo
+    if (typeof pausarMusicaFondo === 'function') {
+        pausarMusicaFondo();
+    }
 
     const estilos = {
         overlay: {

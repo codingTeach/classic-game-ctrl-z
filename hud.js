@@ -7,6 +7,7 @@ let score = 0;
 // Referencias a los elementos del DOM
 let scoreEl = null;
 let vidasEl = null;
+let nivelEl = null;
 
 // INICIALIZACIÓN
 
@@ -26,7 +27,7 @@ function _inyectarEstilos() {
             left: 0;
             width: 100%;
             padding: 16px 28px;
-            display: flex;
+            display: none;
             justify-content: space-between;
             align-items: center;
             z-index: 999;
@@ -116,6 +117,21 @@ function _crearHUD() {
 
     bloqueScore.append(labelScore, scoreEl);
 
+    // Bloque central — Nivel
+    const bloqueNivel = document.createElement("div");
+    bloqueNivel.className = "hud-block";
+    bloqueNivel.style.alignItems = "center";
+
+    const labelNivel = document.createElement("span");
+    labelNivel.className = "hud-label";
+    labelNivel.textContent = "nivel";
+
+    nivelEl = document.createElement("span");
+    nivelEl.className = "hud-value";
+    nivelEl.textContent = "1";
+
+    bloqueNivel.append(labelNivel, nivelEl);
+
     // Bloque derecho — Vidas
     const bloqueVidas = document.createElement("div");
     bloqueVidas.className = "hud-block";
@@ -131,7 +147,7 @@ function _crearHUD() {
 
     bloqueVidas.append(labelVidas, vidasEl);
 
-    hud.append(bloqueScore, bloqueVidas);
+    hud.append(bloqueScore, bloqueNivel, bloqueVidas);
     document.body.appendChild(hud);
 }
 
@@ -171,6 +187,19 @@ function updateScore() {
 
 function updateVidas(vidas) {
     _renderIconosVidas(vidas);
+}
+
+function updateNivel(nivel) {
+    if (!nivelEl) return;
+
+    nivelEl.textContent = nivel;
+
+    // Animación de pulso
+    nivelEl.classList.remove("bump");
+    void nivelEl.offsetWidth;
+    nivelEl.classList.add("bump");
+
+    setTimeout(() => nivelEl.classList.remove("bump"), 80);
 }
 
 // INICIALIZACIÓN
